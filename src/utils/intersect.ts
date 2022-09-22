@@ -14,8 +14,8 @@
 const FONT_SIZE = 256;
 
 function getAAIntersectLength(
-    char1: boolean[][],
-    char2: boolean[][]
+    char1: readonly boolean[][],
+    char2: readonly boolean[][]
 ): number {
     let intersectLines = 0;
 
@@ -29,8 +29,8 @@ function getAAIntersectLength(
 }
 
 function getABIntersectLength(
-    char1: boolean[][],
-    char2: boolean[][]
+    char1: readonly boolean[][],
+    char2: readonly boolean[][]
 ): number {
     let intersectLines = 0;
 
@@ -51,8 +51,8 @@ function getABIntersectLength(
 }
 
 function getACIntersectLength(
-    char1: boolean[][],
-    char2: boolean[][]
+    char1: readonly boolean[][],
+    char2: readonly boolean[][]
 ): number {
     let intersectLines = 0;
 
@@ -67,8 +67,8 @@ function getACIntersectLength(
 }
 
 function getADIntersectLength(
-    char1: boolean[][],
-    char2: boolean[][]
+    char1: readonly boolean[][],
+    char2: readonly boolean[][]
 ): number {
     let intersectLines = 0;
 
@@ -89,8 +89,8 @@ function getADIntersectLength(
 }
 
 function getBAIntersectLength(
-    char1: boolean[][],
-    char2: boolean[][]
+    char1: readonly boolean[][],
+    char2: readonly boolean[][]
 ): number {
     let intersectLines = 0;
 
@@ -110,8 +110,8 @@ function getBAIntersectLength(
 }
 
 function getBBIntersectLength(
-    char1: boolean[][],
-    char2: boolean[][]
+    char1: readonly boolean[][],
+    char2: readonly boolean[][]
 ): number {
     let intersectLines = 0;
 
@@ -138,8 +138,8 @@ function getBBIntersectLength(
 }
 
 function getBCIntersectLength(
-    char1: boolean[][],
-    char2: boolean[][]
+    char1: readonly boolean[][],
+    char2: readonly boolean[][]
 ): number {
     let intersectLines = 0;
 
@@ -160,8 +160,8 @@ function getBCIntersectLength(
 }
 
 function getBDIntersectLength(
-    char1: boolean[][],
-    char2: boolean[][]
+    char1: readonly boolean[][],
+    char2: readonly boolean[][]
 ): number {
     let intersectLines = 0;
 
@@ -188,8 +188,8 @@ function getBDIntersectLength(
 }
 
 export function getBestOrientation(
-    char1: boolean[][],
-    char2: boolean[][]
+    char1: readonly boolean[][],
+    char2: readonly boolean[][]
 ): number {
     const arr = [
         getAAIntersectLength(char1, char2),
