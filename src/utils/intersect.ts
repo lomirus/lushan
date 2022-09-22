@@ -187,6 +187,7 @@ function getBDIntersectLength(
     return intersectLines
 }
 
+/** 返回使得两个字符的邻边可交叉范围最大的朝向ID */
 export function getBestOrientation(
     char1: readonly boolean[][],
     char2: readonly boolean[][]
