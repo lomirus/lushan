@@ -1,16 +1,13 @@
 import './style.css'
-import { pixelateCharacter } from './utils';
-import { getBestOrientation } from './utils/intersect';
-
-const char1 = pixelateCharacter('卜');
-const char2 = pixelateCharacter('賣');
+import { pixelateCharacter, voxelateCharacters } from './utils';
 
 const canvas = document.querySelector('canvas')!;
 const ctx = canvas.getContext('2d');
 if (!ctx) throw "Context is null";
 
 /** Just for debug */
-function createCharCanvas(data: boolean[][]): void {
+function createCharCanvas(char: string): void {
+    const data = pixelateCharacter(char);
     const canvas = document.createElement('canvas');
     canvas.width = 256;
     canvas.height = 256;
@@ -29,7 +26,8 @@ function createCharCanvas(data: boolean[][]): void {
     document.body.append(canvas)
 }
 
-createCharCanvas(char1)
-createCharCanvas(char2)
+createCharCanvas('卜')
+createCharCanvas('賣')
 
-console.log(getBestOrientation(char1, char2))
+const data = voxelateCharacters('卜', '賣')
+console.log(data)

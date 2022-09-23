@@ -1,6 +1,9 @@
+import { getBestOrientation } from "./intersect";
+import { voxelize } from "./voxelization";
+
 const FONT_SIZE = 256;
 
-export function pixelateCharacter(char: string): Array<Array<boolean>> {
+export function pixelateCharacter(char: string): boolean[][] {
     // Initialize Canvas
     const canvas = document.createElement('canvas');
     canvas.width = FONT_SIZE;
@@ -22,4 +25,11 @@ export function pixelateCharacter(char: string): Array<Array<boolean>> {
         }
     }
     return pixelData
+}
+
+export function voxelateCharacters(char1: string, char2: string): boolean[][][] {
+    const charData1 = pixelateCharacter(char1);
+    const charData2 = pixelateCharacter(char2);
+    const bestOrientation = getBestOrientation(charData1, charData2);
+    return voxelize(charData1, charData2, bestOrientation);
 }
