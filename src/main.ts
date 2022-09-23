@@ -5,17 +5,28 @@ import './style.css'
 import { voxelateCharacters } from './utils';
 
 const canvas = document.querySelector('canvas')!;
+const fps = document.getElementById("fps")!;
 
 const data = voxelateCharacters('卜', '賣')
 
-const engine = new Babylon.Engine(canvas, true,  { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false});
+const engine = new Babylon.Engine(canvas, true);
 const scene = new Babylon.Scene(engine);
-const camera = new Babylon.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 3, new Babylon.Vector3(0, 0, 0), scene);
+const camera = new Babylon.ArcRotateCamera(
+    "camera",
+    -Math.PI / 2,
+    Math.PI / 2.5,
+    3,
+    new Babylon.Vector3(0, 0, 0),
+    scene
+);
 camera.attachControl(canvas, true);
 
 new Babylon.HemisphericLight("light", new Babylon.Vector3(0, 1, 0), scene);
 
-engine.runRenderLoop(() => scene.render())
+engine.runRenderLoop(() => {
+    fps.textContent = engine.getFps().toFixed(1);
+    scene.render()
+})
 window.onresize = () => engine.resize()
 
 for (let i = 0; i < FONT_SIZE; i++) {
