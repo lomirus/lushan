@@ -3,11 +3,12 @@ import * as Babylon from '@babylonjs/core'
 import { FONT_SIZE } from './config';
 import './style.css'
 import { voxelateCharacters } from './utils';
+import { createAxises } from './utils/axis';
 
 const canvas = document.querySelector('canvas')!;
 const fps = document.getElementById("fps")!;
 
-const data = voxelateCharacters('卜', '賣')
+const data = voxelateCharacters('卜', '卜')
 
 const engine = new Babylon.Engine(canvas, true);
 const scene = new Babylon.Scene(engine);
@@ -41,3 +42,5 @@ for (let i = 0; i < FONT_SIZE; i++) {
         }
     }
 }
+
+createAxises()
