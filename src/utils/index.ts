@@ -1,7 +1,7 @@
 import { getBestOrientation } from "./intersect";
 import { voxelize } from "./voxelization";
 
-const FONT_SIZE = 256;
+const FONT_SIZE = 64;
 
 export function pixelateCharacter(char: string): boolean[][] {
     // Initialize Canvas

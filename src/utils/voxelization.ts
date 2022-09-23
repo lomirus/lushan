@@ -1,4 +1,4 @@
-const FONT_SIZE = 256;
+const FONT_SIZE = 64;
 
 function voxelizeByAA(
     char1: readonly boolean[][],
