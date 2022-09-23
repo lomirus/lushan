@@ -1,4 +1,4 @@
-const FONT_SIZE = 64;
+import { FONT_SIZE } from "../config";
 
 function voxelizeByAA(
     char1: readonly boolean[][],

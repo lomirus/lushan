@@ -1,9 +1,8 @@
 import * as Babylon from '@babylonjs/core'
 
+import { FONT_SIZE } from './config';
 import './style.css'
 import { voxelateCharacters } from './utils';
-
-const FONT_SIZE = 64;
 
 const canvas = document.querySelector('canvas')!;
 

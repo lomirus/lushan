@@ -11,7 +11,7 @@
 // - ⇁|⇃ (BC)
 // - ⇁|↼ (BD)
 
-const FONT_SIZE = 64;
+import { FONT_SIZE } from "../config";
 
 function getAAIntersectLength(
     char1: readonly boolean[][],
