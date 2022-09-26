@@ -8,8 +8,6 @@ import { compress } from './utils/compress';
 const canvas = document.querySelector('canvas')!;
 const fps = document.getElementById("fps")!;
 
-const data = voxelateCharacters('卜', '卜')
-
 const engine = new Babylon.Engine(canvas, true);
 const scene = new Babylon.Scene(engine);
 const camera = new Babylon.ArcRotateCamera(
@@ -30,6 +28,7 @@ engine.runRenderLoop(() => {
 })
 window.onresize = () => engine.resize()
 
+const data = voxelateCharacters('⛩️', '⛩️')
 const volumns = compress(data)
 
 for (let i = 0; i < volumns.length; i++) {

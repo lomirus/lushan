@@ -10,8 +10,8 @@ function voxelizeByAA(
         for (let y = 0; y < FONT_SIZE; y++) {
             res[x][y] = new Array(FONT_SIZE);
             for (let z = 0; z < FONT_SIZE; z++) {
-                let t1 = char1[FONT_SIZE - y - 1][z];
-                let t2 = char2[FONT_SIZE - y - 1][FONT_SIZE - x - 1];
+                let t1 = char1[FONT_SIZE - y - 1][FONT_SIZE - z - 1];
+                let t2 = char2[FONT_SIZE - y - 1][x];
                 res[x][y][z] = t1 && t2
             }
         }
@@ -165,6 +165,7 @@ export function voxelize(
     char2: readonly boolean[][],
     orientation: number
 ): boolean[][][] {
+    console.log(orientation)
     if (orientation === 0) {
         return voxelizeByAA(char1, char2);
     } else if (orientation === 1) {

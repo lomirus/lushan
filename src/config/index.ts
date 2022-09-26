@@ -1,1 +1,1 @@
-export const FONT_SIZE = 64;
+export const FONT_SIZE = 128;
