@@ -1,9 +1,9 @@
 import * as Babylon from '@babylonjs/core'
 
-import { FONT_SIZE } from './config';
 import './style.css'
 import { voxelateCharacters } from './utils';
 import { createAxises } from './utils/axis';
+import { compress } from './utils/compress';
 
 const canvas = document.querySelector('canvas')!;
 const fps = document.getElementById("fps")!;
@@ -30,17 +30,23 @@ engine.runRenderLoop(() => {
 })
 window.onresize = () => engine.resize()
 
-for (let i = 0; i < FONT_SIZE; i++) {
-    for (let j = 0; j < FONT_SIZE; j++) {
-        for (let k = 0; k < FONT_SIZE; k++) {
-            if (data[i][j][k]) {
-                const box = Babylon.MeshBuilder.CreateBox("box", {}, scene);
-                box.position.x = i
-                box.position.y = j
-                box.position.z = k
-            }
-        }
-    }
+const volumns = compress(data)
+
+for (let i = 0; i < volumns.length; i++) {
+    const volumn = volumns[i];
+    const width = volumn.x2 - volumn.x1 + 1;
+    const height = volumn.y2 - volumn.y1 + 1;
+    const depth = volumn.z2 - volumn.z1 + 1;
+
+    const box = Babylon.MeshBuilder.CreateBox("box", {
+        width,
+        height,
+        depth
+    }, scene);
+
+    box.position.x = volumn.x1 + width / 2
+    box.position.y = volumn.y1 + height / 2
+    box.position.z = volumn.z1 + depth / 2
 }
 
 createAxises()
