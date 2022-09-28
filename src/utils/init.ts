@@ -39,8 +39,8 @@ export function createCamera(canvas: HTMLCanvasElement) {
         "camera",
         -Math.PI / 2,
         Math.PI / 2.5,
-        3,
-        new Babylon.Vector3(0, 0, 0),
+        FONT_SIZE * 2,
+        new Babylon.Vector3(FONT_SIZE / 2, FONT_SIZE / 2, FONT_SIZE / 2),
         scene
     );
     camera.attachControl(canvas, true);
