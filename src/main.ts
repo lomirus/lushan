@@ -4,6 +4,7 @@ import './style.css'
 import {
     createAxises,
     createCamera,
+    createGround,
     createLight,
     createModel,
     startRender
@@ -16,6 +17,7 @@ globalThis.scene = new Babylon.Scene(engine);
 
 createModel('⛩️', '⛩️')
 createAxises();
+createGround();
 createLight();
 createCamera(canvas);
 

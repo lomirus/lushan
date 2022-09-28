@@ -68,6 +68,16 @@ export function createLight() {
     new Babylon.HemisphericLight("light", new Babylon.Vector3(0, 1, 0), scene);
 }
 
+export function createGround() {
+    const ground = Babylon.MeshBuilder.CreateGround('ground', {
+        width: FONT_SIZE * 2,
+        height: FONT_SIZE * 2,
+    })
+    ground.position.x = FONT_SIZE / 2;
+    ground.position.z = FONT_SIZE / 2;
+
+}
+
 export function startRender(engine: Babylon.Engine) {
     const fps = document.getElementById("fps")!;
 
