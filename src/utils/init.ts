@@ -61,11 +61,20 @@ export function createModel(char1: string, char2: string) {
         box.position.x = volumn.x1 + width / 2
         box.position.y = volumn.y1 + height / 2
         box.position.z = volumn.z1 + depth / 2
+
+        shadowGenerator.getShadowMap()?.renderList?.push(box)
+        box.receiveShadows = true;
     }
 }
 
 export function createLight() {
-    new Babylon.HemisphericLight("light", new Babylon.Vector3(0, 1, 0), scene);
+    const light = new Babylon.PointLight(
+        "light",
+        new Babylon.Vector3(FONT_SIZE / 2, FONT_SIZE * 2, FONT_SIZE / 2),
+        scene
+    );
+    light.intensity = 100;
+    globalThis.shadowGenerator = new Babylon.ShadowGenerator(1024, light);
 }
 
 export function createGround() {
@@ -75,7 +84,8 @@ export function createGround() {
     })
     ground.position.x = FONT_SIZE / 2;
     ground.position.z = FONT_SIZE / 2;
-
+    shadowGenerator.getShadowMap()?.renderList?.push(ground)
+    ground.receiveShadows = true;
 }
 
 export function startRender(engine: Babylon.Engine) {

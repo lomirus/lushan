@@ -1,3 +1,6 @@
-declare module globalThis {
-    var scene: Babylon.Scene
+import Babylon from '@babylonjs/core'
+
+declare global {
+    var scene: Babylon.Scene;
+    var shadowGenerator: Babylon.ShadowGenerator
 }
