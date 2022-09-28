@@ -3,6 +3,10 @@ import { voxelateCharacters } from '.';
 import { FONT_SIZE } from '../config';
 import { compress } from './compress';
 
+import albedo from "../assets/pbr/albedo.png"
+import metallic from "../assets/pbr/metallic.png"
+import normalOgl from "../assets/pbr/normal-ogl.png"
+
 export function createAxises() {
     const radius = FONT_SIZE;
     const x = Babylon.MeshBuilder.CreateLines("x", {
@@ -42,7 +46,7 @@ export function createCamera(canvas: HTMLCanvasElement) {
     camera.attachControl(canvas, true);
 }
 
-export function createModel(char1: string, char2: string) {
+export function createModel(char1: string, char2: string, pbr: Babylon.PBRMaterial) {
     const data = voxelateCharacters(char1, char2)
     const volumns = compress(data)
 
@@ -62,6 +66,8 @@ export function createModel(char1: string, char2: string) {
         box.position.y = volumn.y1 + height / 2
         box.position.z = volumn.z1 + depth / 2
 
+        box.material = pbr;
+
         shadowGenerator.getShadowMap()?.renderList?.push(box)
         box.receiveShadows = true;
     }
@@ -73,17 +79,25 @@ export function createLight() {
         new Babylon.Vector3(FONT_SIZE / 2, FONT_SIZE * 2, FONT_SIZE / 2),
         scene
     );
-    light.intensity = 100;
+    light.intensity = 100000;
     globalThis.shadowGenerator = new Babylon.ShadowGenerator(1024, light);
+
+    const env = Babylon.CubeTexture.CreateFromPrefilteredData('/environment.env', scene)
+
+    scene.environmentTexture = env;
+    scene.createDefaultSkybox(env, true);
 }
 
-export function createGround() {
+export function createGround(pbr: Babylon.PBRMaterial) {
     const ground = Babylon.MeshBuilder.CreateGround('ground', {
         width: FONT_SIZE * 2,
         height: FONT_SIZE * 2,
     })
     ground.position.x = FONT_SIZE / 2;
     ground.position.z = FONT_SIZE / 2;
+
+    ground.material = pbr;
+
     shadowGenerator.getShadowMap()?.renderList?.push(ground)
     ground.receiveShadows = true;
 }
@@ -96,4 +110,15 @@ export function startRender(engine: Babylon.Engine) {
         scene.render()
     })
     window.onresize = () => engine.resize()
+}
+
+export function createMaterial(): Babylon.PBRMaterial {
+    const pbr = new Babylon.PBRMaterial("pbr", scene);
+
+    pbr.roughness = 1
+    pbr.albedoTexture = new Babylon.Texture(albedo, scene);
+    pbr.bumpTexture = new Babylon.Texture(normalOgl, scene);
+    pbr.metallicTexture = new Babylon.Texture(metallic, scene);
+
+    return pbr;
 }
