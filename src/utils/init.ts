@@ -6,6 +6,7 @@ import { compress } from './compress';
 import albedo from "../assets/pbr/albedo.png"
 import metallic from "../assets/pbr/metallic.png"
 import normalOgl from "../assets/pbr/normal-ogl.png"
+import { smooth } from './smooth';
 
 export function createAxises() {
     const radius = FONT_SIZE;
@@ -71,12 +72,30 @@ export function createModel(char1: string, char2: string, pbr: Babylon.PBRMateri
         shadowGenerator.getShadowMap()?.renderList?.push(box)
         box.receiveShadows = true;
     }
+
+    const planes = smooth(data);
+
+    planes.forEach((planeSrc) => {
+        const plane = Babylon.MeshBuilder.CreatePlane("plane", {
+            width: 1,
+            height: Math.SQRT2,
+        }, scene);
+
+        plane.position.x = planeSrc.px + 0.5;
+        plane.position.y = planeSrc.py + 0.5;
+        plane.position.z = planeSrc.pz + 0.5;
+
+        plane.rotation.x = planeSrc.rx;
+        plane.rotation.y = planeSrc.ry;
+        plane.rotation.z = planeSrc.rz;
+    })
+
 }
 
 export function createLight() {
     const light = new Babylon.PointLight(
         "light",
-        new Babylon.Vector3(FONT_SIZE / 2, FONT_SIZE * 2, FONT_SIZE / 2),
+        new Babylon.Vector3(-FONT_SIZE / 2, FONT_SIZE * 2, -FONT_SIZE / 2),
         scene
     );
     light.intensity = 100000;
@@ -93,6 +112,7 @@ export function createGround(pbr: Babylon.PBRMaterial) {
         width: FONT_SIZE * 2,
         height: FONT_SIZE * 2,
     })
+
     ground.position.x = FONT_SIZE / 2;
     ground.position.z = FONT_SIZE / 2;
 
