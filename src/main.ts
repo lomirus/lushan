@@ -20,7 +20,7 @@ const pbr = createMaterial()
 
 createLight();
 
-createModel('口', '口', pbr);
+createModel('田', '田', pbr);
 createGround(pbr);
 createAxises();
 createCamera(canvas);

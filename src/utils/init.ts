@@ -73,7 +73,7 @@ export function createModel(char1: string, char2: string, pbr: Babylon.PBRMateri
         box.receiveShadows = true;
     }
 
-    const planes = smooth(data);
+    const [planes, vertexData] = smooth(data);
 
     planes.forEach((planeSrc) => {
         const plane = Babylon.MeshBuilder.CreatePlane("plane", {
@@ -90,6 +90,8 @@ export function createModel(char1: string, char2: string, pbr: Babylon.PBRMateri
         plane.rotation.z = planeSrc.rz;
     })
 
+    const triangles = new Babylon.Mesh('triangles', scene);
+    vertexData.applyToMesh(triangles)
 }
 
 export function createLight() {
