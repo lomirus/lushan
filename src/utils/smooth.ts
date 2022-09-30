@@ -134,7 +134,6 @@ export function smooth(data: boolean[][][]): [Plane[], VertexData] {
                         pz: z,
                     })
                     if (!data[x + 1][y][z - 1] && !data[x + 1][y - 1][z]) {
-
                         positions.push(x + 1, y + 1, z);
                         positions.push(x + 1, y, z);
                         positions.push(x + 1, y, z + 1);
@@ -154,12 +153,14 @@ export function smooth(data: boolean[][][]): [Plane[], VertexData] {
                         pz: z,
                     })
                     if (!data[x + 1][y - 1][z] && !data[x + 1][y][z + 1]) {
-
                         positions.push(x + 1, y, z + 1);
                         positions.push(x + 1, y + 1, z + 1);
                         positions.push(x + 1, y, z);
                     }
                     if (!data[x - 1][y - 1][z] && !data[x - 1][y][z + 1]) {
+                        positions.push(x , y, z);
+                        positions.push(x , y + 1, z + 1);
+                        positions.push(x , y, z + 1);
                     }
                 } else if (back && up) {
                     planes.push({
