@@ -1,6 +1,6 @@
 import * as Babylon from '@babylonjs/core'
 import { voxelateCharacters } from '.';
-import { FONT_SIZE, RENDER_SHADOW } from '../config';
+import { ENABLE_SMOOTH, FONT_SIZE, RENDER_SHADOW } from '../config';
 import { compress } from './compress';
 
 import albedo from "../assets/pbr/albedo.png"
@@ -76,28 +76,30 @@ export function createModel(char1: string, char2: string, pbr: Babylon.PBRMateri
         }
     }
 
-    const [planes, vertexData] = smooth(data);
+    if (ENABLE_SMOOTH) {
+        const [planes, vertexData] = smooth(data);
 
-    planes.forEach((planeSrc) => {
-        const plane = Babylon.MeshBuilder.CreatePlane("plane", {
-            width: 1,
-            height: Math.SQRT2,
-        }, scene);
-
-        plane.position.x = planeSrc.px + 0.5;
-        plane.position.y = planeSrc.py + 0.5;
-        plane.position.z = planeSrc.pz + 0.5;
-
-        plane.rotation.x = planeSrc.rx;
-        plane.rotation.y = planeSrc.ry;
-        plane.rotation.z = planeSrc.rz;
-
-        plane.material = pbr;
-    })
-
-    const triangles = new Babylon.Mesh('triangles', scene);
-    triangles.material = pbr;
-    vertexData.applyToMesh(triangles)
+        planes.forEach((planeSrc) => {
+            const plane = Babylon.MeshBuilder.CreatePlane("plane", {
+                width: 1,
+                height: Math.SQRT2,
+            }, scene);
+    
+            plane.position.x = planeSrc.px + 0.5;
+            plane.position.y = planeSrc.py + 0.5;
+            plane.position.z = planeSrc.pz + 0.5;
+    
+            plane.rotation.x = planeSrc.rx;
+            plane.rotation.y = planeSrc.ry;
+            plane.rotation.z = planeSrc.rz;
+    
+            plane.material = pbr;
+        })
+    
+        const triangles = new Babylon.Mesh('triangles', scene);
+        triangles.material = pbr;
+        vertexData.applyToMesh(triangles)
+    }
 }
 
 export function createLight() {
