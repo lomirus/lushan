@@ -57,9 +57,29 @@ function getCDFromEdgeAndFaceCube(
     faceCube: readonly [number, number, number]
 ): [number[], number[]] {
     if (edgeCube[0] === 0) {
-        let same = edgeCube[1] === edgeCube[2];
-        const c = [1, same ? 1 : 0, same ? 0 : 0];
-        const d = [1, same ? 0 : 1, same ? 1 : 1];
+        const [c, d] = (() => {
+            if (edgeCube[1] === -1 && edgeCube[2] === -1)
+                return [
+                    [1, 1, 0],
+                    [1, 0, 1],
+                ]
+            else if (edgeCube[1] === -1 && edgeCube[2] === 1)
+                return [
+                    [1, 0, 0],
+                    [1, 1, 1]
+                ]
+            else if (edgeCube[1] === 1 && edgeCube[2] === -1)
+                return [
+                    [1, 1, 1],
+                    [1, 0, 0],
+                ]
+            else
+                return [
+                    [1, 0, 1],
+                    [1, 1, 0],
+                ]
+        })()
+
         return faceCube[0] === 1 ?
             [c, d] :
             [
@@ -67,9 +87,28 @@ function getCDFromEdgeAndFaceCube(
                 d.map(v => v === 0 ? 1 : 0)
             ]
     } else if (edgeCube[1] === 0) {
-        let same = edgeCube[0] === edgeCube[2];
-        const c = [same ? 1 : 0, 1, same ? 0 : 0];
-        const d = [same ? 0 : 1, 1, same ? 1 : 1];
+        const [c, d] = (() => {
+            if (edgeCube[0] === -1 && edgeCube[2] === -1)
+                return [
+                    [0, 1, 1],
+                    [1, 1, 0]
+                ]
+            else if (edgeCube[0] === -1 && edgeCube[2] === 1)
+                return [
+                    [1, 1, 1],
+                    [0, 1, 0]
+                ]
+            else if (edgeCube[0] === 1 && edgeCube[2] === -1)
+                return [
+                    [0, 1, 0],
+                    [1, 1, 1]
+                ]
+            else
+                return [
+                    [1, 1, 0],
+                    [0, 1, 1]
+                ]
+        })()
         return faceCube[1] === 1 ?
             [c, d] :
             [
@@ -77,9 +116,29 @@ function getCDFromEdgeAndFaceCube(
                 d.map(v => v === 0 ? 1 : 0)
             ]
     } else {
-        let same = edgeCube[0] === edgeCube[1];
-        const c = [same ? 1 : 0, same ? 0 : 0, 1];
-        const d = [same ? 0 : 1, same ? 1 : 1, 1];
+
+        const [c, d] = (() => {
+            if (edgeCube[0] === -1 && edgeCube[1] === -1)
+                return [
+                    [1, 0, 1],
+                    [0, 1, 1],
+                ]
+            else if (edgeCube[0] === -1 && edgeCube[1] === 1)
+                return [
+                    [0, 0, 1],
+                    [1, 1, 1]
+                ]
+            else if (edgeCube[0] === 1 && edgeCube[1] === -1)
+                return [
+                    [1, 1, 1],
+                    [0, 0, 1],
+                ]
+            else
+                return [
+                    [0, 1, 1],
+                    [1, 0, 1],
+                ]
+        })()
         return faceCube[2] === 1 ?
             [c, d] :
             [
@@ -129,9 +188,8 @@ function getPlaneRotation(data: boolean[][][], x: number, y: number, z: number) 
 export function smooth(data: boolean[][][]): [Plane[], VertexData] {
     const planes: Plane[] = [];
     const vertexData = new Babylon.VertexData();
-    const positions: Babylon.Nullable<Babylon.FloatArray> = [];
-    // const uvs = [0]
-    // let sum = 0;
+    vertexData.positions = [];
+    vertexData.uvs = []
     for (let x = 1; x < FONT_SIZE - 1; x++) {
         for (let y = 1; y < FONT_SIZE - 1; y++) {
             voxel:
@@ -163,51 +221,56 @@ export function smooth(data: boolean[][][]): [Plane[], VertexData] {
                         if (!data[x + ex][y + ey][z + ez]) continue;
 
                         const [c, d] = getCDFromEdgeAndFaceCube(adjacentEdgeCube, faceCube)
-                        positions.push(
+                        vertexData.positions.push(
                             (fx - ex === -1) ? x : x + 1,
                             (fy - ey === -1) ? y : y + 1,
                             (fz - ez === -1) ? z : z + 1,
                         )
-                        positions.push(
+                        vertexData.positions.push(
                             (ex - fx === -1) ? x : x + 1,
                             (ey - fy === -1) ? y : y + 1,
                             (ez - fz === -1) ? z : z + 1,
                         )
-                        positions.push(
+                        vertexData.positions.push(
                             x + c[0],
                             y + c[1],
                             z + c[2],
                         )
 
-                        positions.push(
+                        vertexData.positions.push(
                             (ex - fx === -1) ? x : x + 1,
                             (ey - fy === -1) ? y : y + 1,
                             (ez - fz === -1) ? z : z + 1,
                         )
-                        positions.push(
+                        vertexData.positions.push(
                             (fx - ex === -1) ? x : x + 1,
                             (fy - ey === -1) ? y : y + 1,
                             (fz - ez === -1) ? z : z + 1,
                         )
-                        positions.push(
+                        vertexData.positions.push(
                             x + d[0],
                             y + d[1],
                             z + d[2],
                         )
+
+                        for (let i = 0; i < 6; i++) {
+                            vertexData.uvs.push(0, 0, 1)
+                        }
                     }
                 }
             }
         }
     }
-    // console.log(sum)
-    vertexData.positions = positions;
     vertexData.indices = Array.from(
-        { length: positions.length / 3 },
+        { length: vertexData.positions.length / 3 },
         (_, i) => i
     )
     vertexData.normals = []
-    VertexData.ComputeNormals(positions, vertexData.indices, vertexData.normals);
-    // vertexData.uvs = uvs
+    VertexData.ComputeNormals(
+        vertexData.positions,
+        vertexData.indices,
+        vertexData.normals
+    );
 
     return [planes, vertexData];
 }

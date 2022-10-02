@@ -45,6 +45,7 @@ export function createCamera(canvas: HTMLCanvasElement) {
         scene
     );
     camera.attachControl(canvas, true);
+    camera.wheelPrecision = 20
 }
 
 export function createModel(char1: string, char2: string, pbr: Babylon.PBRMaterial) {
@@ -88,10 +89,11 @@ export function createModel(char1: string, char2: string, pbr: Babylon.PBRMateri
         plane.rotation.x = planeSrc.rx;
         plane.rotation.y = planeSrc.ry;
         plane.rotation.z = planeSrc.rz;
+
+        plane.material = pbr;
     })
 
     const triangles = new Babylon.Mesh('triangles', scene);
-    pbr.backFaceCulling = false;
     triangles.material = pbr;
     vertexData.applyToMesh(triangles)
 }
@@ -102,7 +104,7 @@ export function createLight() {
         new Babylon.Vector3(-FONT_SIZE / 2, FONT_SIZE * 2, -FONT_SIZE / 2),
         scene
     );
-    light.intensity = 100000;
+    light.intensity = 10000;
     globalThis.shadowGenerator = new Babylon.ShadowGenerator(1024, light);
 
     const env = Babylon.CubeTexture.CreateFromPrefilteredData('/environment.env', scene)
