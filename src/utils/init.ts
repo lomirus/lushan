@@ -91,6 +91,8 @@ export function createModel(char1: string, char2: string, pbr: Babylon.PBRMateri
     })
 
     const triangles = new Babylon.Mesh('triangles', scene);
+    pbr.backFaceCulling = false;
+    triangles.material = pbr;
     vertexData.applyToMesh(triangles)
 }
 

@@ -20,7 +20,9 @@ const pbr = createMaterial()
 
 createLight();
 
-createModel('田', '田', pbr);
+createModel('❌', '❌', pbr);
+
+// createModel('龙', '龙', pbr);
 createGround(pbr);
 createAxises();
 createCamera(canvas);

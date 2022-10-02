@@ -11,412 +11,195 @@ type Plane = {
     pz: number,
 }
 
+const faceCubes = [
+    [0, 0, -1],
+    [0, 0, 1],
+
+    [0, -1, 0],
+    [0, 1, 0],
+
+    [-1, 0, 0],
+    [1, 0, 0]
+] as const;
+
+function adjacentEdgeCubesToFaceCube(faceCube: readonly [number, number, number]): [
+    [number, number, number],
+    [number, number, number],
+    [number, number, number],
+    [number, number, number]
+] {
+    if (faceCube[0] === -1 || faceCube[0] === 1) {
+        return [
+            [0, -1, -1],
+            [0, -1, 1],
+            [0, 1, -1],
+            [0, 1, 1],
+        ]
+    } else if (faceCube[1] === -1 || faceCube[1] === 1) {
+        return [
+            [-1, 0, -1],
+            [-1, 0, 1],
+            [1, 0, -1],
+            [1, 0, 1],
+        ]
+    } else {
+        return [
+            [-1, -1, 0],
+            [-1, 1, 0],
+            [1, -1, 0],
+            [1, 1, 0],
+        ]
+    }
+}
+
+function getCDFromEdgeAndFaceCube(
+    edgeCube: readonly [number, number, number],
+    faceCube: readonly [number, number, number]
+): [number[], number[]] {
+    if (edgeCube[0] === 0) {
+        let same = edgeCube[1] === edgeCube[2];
+        const c = [1, same ? 1 : 0, same ? 0 : 0];
+        const d = [1, same ? 0 : 1, same ? 1 : 1];
+        return faceCube[0] === 1 ?
+            [c, d] :
+            [
+                c.map(v => v === 0 ? 1 : 0),
+                d.map(v => v === 0 ? 1 : 0)
+            ]
+    } else if (edgeCube[1] === 0) {
+        let same = edgeCube[0] === edgeCube[2];
+        const c = [same ? 1 : 0, 1, same ? 0 : 0];
+        const d = [same ? 0 : 1, 1, same ? 1 : 1];
+        return faceCube[1] === 1 ?
+            [c, d] :
+            [
+                c.map(v => v === 0 ? 1 : 0),
+                d.map(v => v === 0 ? 1 : 0)
+            ]
+    } else {
+        let same = edgeCube[0] === edgeCube[1];
+        const c = [same ? 1 : 0, same ? 0 : 0, 1];
+        const d = [same ? 0 : 1, same ? 1 : 1, 1];
+        return faceCube[2] === 1 ?
+            [c, d] :
+            [
+                c.map(v => v === 0 ? 1 : 0),
+                d.map(v => v === 0 ? 1 : 0)
+            ]
+    }
+}
+
+function getPlaneRotation(data: boolean[][][], x: number, y: number, z: number) {
+    const up = data[x][y + 1][z]
+    const down = data[x][y - 1][z]
+    const left = data[x - 1][y][z]
+    const right = data[x + 1][y][z]
+    const front = data[x][y][z - 1]
+    const back = data[x][y][z + 1]
+
+    if (up && left) {
+        return [-1, -2, 0]
+    } else if (left && down) {
+        return [1, -2, 0]
+    } else if (down && right) {
+        return [1, 2, 0]
+    } else if (right && up) {
+        return [-1, 2, 0]
+    } else if (up && front) {
+        return [-3, 0, 0]
+    } else if (front && down) {
+        return [3, 0, 0]
+    } else if (down && back) {
+        return [1, 0, 0]
+    } else if (back && up) {
+        return [-1, 0, 0]
+    } else if (front && left) {
+        return [0, -3, 2]
+    } else if (front && right) {
+        return [0, 3, 2]
+    } else if (back && left) {
+        return [0, -1, 2]
+    } else if (back && right) {
+        return [0, 1, 2]
+    } else {
+        return []
+    }
+}
+
 export function smooth(data: boolean[][][]): [Plane[], VertexData] {
     const planes: Plane[] = [];
     const vertexData = new Babylon.VertexData();
-    const positions = [];
+    const positions: Babylon.Nullable<Babylon.FloatArray> = [];
     // const uvs = [0]
-
+    // let sum = 0;
     for (let x = 1; x < FONT_SIZE - 1; x++) {
         for (let y = 1; y < FONT_SIZE - 1; y++) {
+            voxel:
             for (let z = 1; z < FONT_SIZE - 1; z++) {
                 if (data[x][y][z]) continue;
 
-                const up = data[x][y + 1][z]
-                const down = data[x][y - 1][z]
-                const left = data[x - 1][y][z]
-                const right = data[x + 1][y][z]
-                const front = data[x][y][z - 1]
-                const back = data[x][y][z + 1]
-
-                if (up && left) {
+                const rotation = getPlaneRotation(data, x, y, z);
+                if (rotation.length !== 0) {
                     planes.push({
-                        rx: -Math.PI / 4,
-                        ry: -Math.PI / 2,
-                        rz: 0,
+                        rx: rotation[0] * Math.PI / 4,
+                        ry: rotation[1] * Math.PI / 4,
+                        rz: rotation[2] * Math.PI / 4,
                         px: x,
                         py: y,
                         pz: z,
                     })
-                    if (!data[x][y + 1][z + 1] && !data[x - 1][y][z + 1]) {
-                        positions.push(x, y + 1, z + 1);
-                        positions.push(x + 1, y + 1, z + 1);
-                        positions.push(x, y, z + 1);
-                    }
-                    if (!data[x][y + 1][z - 1] && !data[x - 1][y][z - 1]) {
-                        positions.push(x, y, z);
-                        positions.push(x + 1, y + 1, z);
-                        positions.push(x, y + 1, z);
-                    }
-                } else if (left && down) {
-                    planes.push({
-                        rx: Math.PI / 4,
-                        ry: -Math.PI / 2,
-                        rz: 0,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x - 1][y][z + 1] && !data[x][y - 1][z + 1]) {
-                        positions.push(x, y + 1, z + 1);
-                        positions.push(x + 1, y, z + 1);
-                        positions.push(x, y, z + 1);
-                    }
-                    if (!data[x - 1][y][z - 1] && !data[x][y - 1][z - 1]) {
-                        positions.push(x, y, z);
-                        positions.push(x + 1, y, z);
-                        positions.push(x, y + 1, z);
-                    }
-                } else if (down && right) {
-                    planes.push({
-                        rx: Math.PI / 4,
-                        ry: Math.PI / 2,
-                        rz: 0,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x][y - 1][z + 1] && !data[x + 1][y][z + 1]) {
-                        positions.push(x + 1, y + 1, z + 1);
-                        positions.push(x + 1, y, z + 1);
-                        positions.push(x, y, z + 1);
-                    }
-                    if (!data[x][y - 1][z - 1] && !data[x + 1][y][z - 1]) {
-                        positions.push(x, y, z);
-                        positions.push(x + 1, y, z);
-                        positions.push(x + 1, y + 1, z);
-                    }
-                } else if (right && up) {
-                    planes.push({
-                        rx: -Math.PI / 4,
-                        ry: Math.PI / 2,
-                        rz: 0,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x + 1][y][z + 1] && !data[x][y + 1][z + 1]) {
-                        positions.push(x + 1, y + 1, z + 1);
-                        positions.push(x + 1, y, z + 1);
-                        positions.push(x, y + 1, z + 1);
-                    }
-                    if (!data[x + 1][y][z - 1] && !data[x][y + 1][z - 1]) {
-                        positions.push(x, y + 1, z);
-                        positions.push(x + 1, y, z);
-                        positions.push(x + 1, y + 1, z);
-                    }
-                } else if (up && front) {
-                    planes.push({
-                        rx: -Math.PI / 4 * 3,
-                        ry: 0,
-                        rz: 0,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x + 1][y + 1][z] && !data[x + 1][y][z - 1]) {
-                        positions.push(x + 1, y + 1, z);
-                        positions.push(x + 1, y, z);
-                        positions.push(x + 1, y + 1, z + 1);
-                    }
-                    if (!data[x - 1][y + 1][z] && !data[x - 1][y][z - 1]) {
-                        positions.push(x, y + 1, z + 1);
-                        positions.push(x, y, z);
-                        positions.push(x, y + 1, z);
-                    }
-                } else if (front && down) {
-                    planes.push({
-                        rx: Math.PI / 4 * 3,
-                        ry: 0,
-                        rz: 0,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x + 1][y][z - 1] && !data[x + 1][y - 1][z]) {
-                        positions.push(x + 1, y + 1, z);
-                        positions.push(x + 1, y, z);
-                        positions.push(x + 1, y, z + 1);
-                    }
-                    if (!data[x - 1][y][z - 1] && !data[x - 1][y - 1][z]) {
-                        positions.push(x, y, z + 1);
-                        positions.push(x, y, z);
-                        positions.push(x, y + 1, z);
-                    }
-                } else if (down && back) {
-                    planes.push({
-                        rx: Math.PI / 4,
-                        ry: 0,
-                        rz: 0,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x + 1][y - 1][z] && !data[x + 1][y][z + 1]) {
-                        positions.push(x + 1, y, z + 1);
-                        positions.push(x + 1, y + 1, z + 1);
-                        positions.push(x + 1, y, z);
-                    }
-                    if (!data[x - 1][y - 1][z] && !data[x - 1][y][z + 1]) {
-                        positions.push(x , y, z);
-                        positions.push(x , y + 1, z + 1);
-                        positions.push(x , y, z + 1);
-                    }
-                } else if (back && up) {
-                    planes.push({
-                        rx: -Math.PI / 4,
-                        ry: 0,
-                        rz: 0,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x + 1][y][z + 1] && !data[x + 1][y + 1][z]) {
-                        positions.push(x + 1, y + 1, z + 1);
-                        positions.push(x + 1, y + 1, z);
-                        positions.push(x + 1, y, z + 1);
-                    }
-                    if (!data[x - 1][y][z + 1] && !data[x - 1][y + 1][z]) {
-                        positions.push(x, y, z + 1);
-                        positions.push(x, y + 1, z);
-                        positions.push(x, y + 1, z + 1);
-                    }
-                } else if (front && left) {
-                    planes.push({
-                        rx: 0,
-                        ry: -Math.PI / 4 * 3,
-                        rz: Math.PI / 2,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x][y + 1][z - 1] && !data[x - 1][y + 1][z]) {
-                        positions.push(x, y + 1, z);
-                        positions.push(x + 1, y + 1, z);
-                        positions.push(x, y + 1, z + 1);
-                    }
-                    if (!data[x][y - 1][z - 1] && !data[x - 1][y - 1][z]) {
-                        positions.push(x, y, z + 1);
-                        positions.push(x + 1, y, z);
-                        positions.push(x, y, z);
-                    }
-                } else if (front && right) {
-                    planes.push({
-                        rx: 0,
-                        ry: Math.PI / 4 * 3,
-                        rz: Math.PI / 2,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x][y + 1][z - 1] && !data[x + 1][y + 1][z]) {
-                        positions.push(x, y + 1, z);
-                        positions.push(x + 1, y + 1, z);
-                        positions.push(x + 1, y + 1, z + 1);
-                    }
-                    if (!data[x][y - 1][z - 1] && !data[x + 1][y - 1][z]) {
-                        positions.push(x + 1, y, z + 1);
-                        positions.push(x + 1, y, z);
-                        positions.push(x, y, z);
-                    }
-                } else if (back && left) {
-                    planes.push({
-                        rx: 0,
-                        ry: -Math.PI / 4,
-                        rz: Math.PI / 2,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x][y + 1][z + 1] && !data[x - 1][y + 1][z]) {
-                        positions.push(x, y + 1, z);
-                        positions.push(x + 1, y + 1, z + 1);
-                        positions.push(x, y + 1, z + 1);
-                    }
-                    if (!data[x][y - 1][z + 1] && !data[x - 1][y - 1][z]) {
-                        positions.push(x, y, z + 1);
-                        positions.push(x + 1, y, z + 1);
-                        positions.push(x, y, z);
-                    }
-                } else if (back && right) {
-                    planes.push({
-                        rx: 0,
-                        ry: Math.PI / 4,
-                        rz: Math.PI / 2,
-                        px: x,
-                        py: y,
-                        pz: z,
-                    })
-                    if (!data[x][y + 1][z + 1] && !data[x + 1][y + 1][z]) {
-                        positions.push(x + 1, y + 1, z);
-                        positions.push(x + 1, y + 1, z + 1);
-                        positions.push(x, y + 1, z + 1);
-                    }
-                    if (!data[x][y - 1][z + 1] && !data[x + 1][y - 1][z]) {
-                        positions.push(x, y, z + 1);
-                        positions.push(x + 1, y, z + 1);
-                        positions.push(x + 1, y, z);
-                    }
-                } else if (up) {
-                    if (
-                        data[x - 1][y + 1][z] &&
-                        data[x][y + 1][z - 1] &&
-                        data[x - 1][y][z - 1]
-                    ) {
+                    continue voxel;
+                }
 
-                    } else if (
-                        data[x - 1][y + 1][z] &&
-                        data[x][y + 1][z + 1] &&
-                        data[x - 1][y][z + 1]
-                    ) {
+                for (let i = 0; i < faceCubes.length; i++) {
+                    const faceCube = faceCubes[i];
+                    const [fx, fy, fz] = faceCube;
+                    if (!data[x + fx][y + fy][z + fz]) continue;
 
-                    } else if (
-                        data[x + 1][y + 1][z] &&
-                        data[x][y + 1][z + 1] &&
-                        data[x + 1][y][z + 1]
-                    ) {
+                    const adjacentEdgeCubes = adjacentEdgeCubesToFaceCube(faceCube);
+                    for (let j = 0; j < adjacentEdgeCubes.length; j++) {
+                        const adjacentEdgeCube = adjacentEdgeCubes[j];
+                        const [ex, ey, ez] = adjacentEdgeCube;
+                        if (!data[x + ex][y + ey][z + ez]) continue;
 
-                    } else if (
-                        data[x + 1][y + 1][z] &&
-                        data[x][y + 1][z + 1] &&
-                        data[x + 1][y][z + 1]
-                    ) {
+                        const [c, d] = getCDFromEdgeAndFaceCube(adjacentEdgeCube, faceCube)
+                        positions.push(
+                            (fx - ex === -1) ? x : x + 1,
+                            (fy - ey === -1) ? y : y + 1,
+                            (fz - ez === -1) ? z : z + 1,
+                        )
+                        positions.push(
+                            (ex - fx === -1) ? x : x + 1,
+                            (ey - fy === -1) ? y : y + 1,
+                            (ez - fz === -1) ? z : z + 1,
+                        )
+                        positions.push(
+                            x + c[0],
+                            y + c[1],
+                            z + c[2],
+                        )
 
-                    }
-                } else if (down) {
-                    if (
-                        data[x - 1][y - 1][z] &&
-                        data[x][y - 1][z - 1] &&
-                        data[x - 1][y][z - 1]
-                    ) {
-
-                    } else if (
-                        data[x - 1][y - 1][z] &&
-                        data[x][y - 1][z + 1] &&
-                        data[x - 1][y][z + 1]
-                    ) {
-
-                    } else if (
-                        data[x + 1][y - 1][z] &&
-                        data[x][y - 1][z + 1] &&
-                        data[x + 1][y][z + 1]
-                    ) {
-
-                    } else if (
-                        data[x + 1][y - 1][z] &&
-                        data[x][y - 1][z + 1] &&
-                        data[x + 1][y][z + 1]
-                    ) {
-
-                    }
-                } else if (left) {
-                    if (
-                        data[x - 1][y + 1][z] &&
-                        data[x - 1][y][z - 1] &&
-                        data[x][y + 1][z - 1]
-                    ) {
-
-                    } else if (
-                        data[x - 1][y - 1][z] &&
-                        data[x - 1][y][z - 1] &&
-                        data[x][y - 1][z - 1]
-                    ) {
-
-                    } else if (
-                        data[x - 1][y - 1][z] &&
-                        data[x - 1][y][z + 1] &&
-                        data[x][y - 1][z + 1]
-                    ) {
-
-                    } else if (
-                        data[x - 1][y + 1][z] &&
-                        data[x - 1][y][z + 1] &&
-                        data[x][y + 1][z + 1]
-                    ) {
-
-                    }
-                } else if (right) {
-                    if (
-                        data[x + 1][y + 1][z] &&
-                        data[x + 1][y][z - 1] &&
-                        data[x][y + 1][z - 1]
-                    ) {
-
-                    } else if (
-                        data[x + 1][y - 1][z] &&
-                        data[x + 1][y][z - 1] &&
-                        data[x][y - 1][z - 1]
-                    ) {
-
-                    } else if (
-                        data[x + 1][y - 1][z] &&
-                        data[x + 1][y][z + 1] &&
-                        data[x][y - 1][z + 1]
-                    ) {
-
-                    } else if (
-                        data[x + 1][y + 1][z] &&
-                        data[x + 1][y][z + 1] &&
-                        data[x][y + 1][z + 1]
-                    ) {
-
-                    }
-                } else if (front) {
-                    if (
-                        data[x][y + 1][z - 1] &&
-                        data[x - 1][y][z - 1] &&
-                        data[x - 1][y + 1][z]
-                    ) {
-
-                    } else if (
-                        data[x][y - 1][z - 1] &&
-                        data[x - 1][y][z - 1] &&
-                        data[x - 1][y - 1][z]
-                    ) {
-
-                    } else if (
-                        data[x][y - 1][z - 1] &&
-                        data[x + 1][y][z - 1] &&
-                        data[x + 1][y - 1][z]
-                    ) {
-
-                    } else if (
-                        data[x][y + 1][z - 1] &&
-                        data[x + 1][y][z - 1] &&
-                        data[x + 1][y + 1][z]
-                    ) {
-
-                    }
-                } else if (back) {
-                    if (
-                        data[x][y + 1][z + 1] &&
-                        data[x - 1][y][z + 1] &&
-                        data[x - 1][y + 1][z]
-                    ) {
-
-                    } else if (
-                        data[x][y - 1][z + 1] &&
-                        data[x - 1][y][z + 1] &&
-                        data[x - 1][y - 1][z]
-                    ) {
-
-                    } else if (
-                        data[x][y - 1][z + 1] &&
-                        data[x + 1][y][z + 1] &&
-                        data[x + 1][y - 1][z]
-                    ) {
-
-                    } else if (
-                        data[x][y + 1][z + 1] &&
-                        data[x + 1][y][z + 1] &&
-                        data[x + 1][y + 1][z]
-                    ) {
-
+                        positions.push(
+                            (ex - fx === -1) ? x : x + 1,
+                            (ey - fy === -1) ? y : y + 1,
+                            (ez - fz === -1) ? z : z + 1,
+                        )
+                        positions.push(
+                            (fx - ex === -1) ? x : x + 1,
+                            (fy - ey === -1) ? y : y + 1,
+                            (fz - ez === -1) ? z : z + 1,
+                        )
+                        positions.push(
+                            x + d[0],
+                            y + d[1],
+                            z + d[2],
+                        )
                     }
                 }
             }
         }
     }
+    // console.log(sum)
     vertexData.positions = positions;
     vertexData.indices = Array.from(
         { length: positions.length / 3 },
