@@ -1,6 +1,6 @@
 import * as Babylon from '@babylonjs/core'
 import { voxelateCharacters } from '.';
-import { FONT_SIZE } from '../config';
+import { FONT_SIZE, RENDER_SHADOW } from '../config';
 import { compress } from './compress';
 
 import albedo from "../assets/pbr/albedo.png"
@@ -70,8 +70,10 @@ export function createModel(char1: string, char2: string, pbr: Babylon.PBRMateri
 
         box.material = pbr;
 
-        shadowGenerator.getShadowMap()?.renderList?.push(box)
-        box.receiveShadows = true;
+        if (RENDER_SHADOW) {
+            shadowGenerator.getShadowMap()?.renderList?.push(box)
+            box.receiveShadows = true;
+        }
     }
 
     const [planes, vertexData] = smooth(data);
@@ -124,8 +126,10 @@ export function createGround(pbr: Babylon.PBRMaterial) {
 
     ground.material = pbr;
 
-    shadowGenerator.getShadowMap()?.renderList?.push(ground)
-    ground.receiveShadows = true;
+    if (RENDER_SHADOW) {
+        shadowGenerator.getShadowMap()?.renderList?.push(ground)
+        ground.receiveShadows = true;
+    }
 }
 
 export function startRender(engine: Babylon.Engine) {
